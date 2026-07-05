@@ -1,0 +1,106 @@
+# kev configuration — OPTIONAL.
+#
+# kev runs with no config file at all (sensible defaults are applied). Copy this to
+# `config.toml` next to the binary only if you want to customize behavior or hard-code
+# a VirusTotal key. You can also just press `v` in the monitor to add a key at runtime.
+# NEVER commit a real API key to source control.
+
+[signature]
+# Perform online (OCSP/CRL) revocation checks of the whole certificate chain.
+# true  -> WTD_REVOKE_WHOLECHAIN (detects revoked certs; network I/O, slower)
+# false -> WTD_REVOKE_NONE (offline, fast; `revoked` never set)
+# The live monitor is always offline regardless; this affects one-shot `scan`/`verify`.
+online_revocation = true
+
+[rules.weights]
+wrong_path = 40
+wrong_parent = 25
+name_spoof = 50
+unsigned_in_system_path = 60
+untrusted_publisher_in_system_dir = 35
+
+[thresholds]
+suspicious = 30     # score >= this  -> Suspicious
+malicious = 80      # score >= this  -> Malicious
+trusted_bonus = 100 # subtracted when an image matches a trusted baseline entry
+
+[reputation]
+# VirusTotal lookups for the untrusted/unknown tail (requires the `reputation` build feature).
+# Provide the key via the VT_API_KEY env var, or set api_key here in your *runtime* copy only.
+# Only file hashes (SHA-256) are sent to VirusTotal, never the files themselves.
+enabled = false
+# api_key = "PASTE-YOUR-VIRUSTOTAL-API-KEY-HERE"
+vt_malicious_threshold = 5
+
+[trust]
+# A validly-signed binary whose Authenticode publisher matches one of these (case-insensitive
+# substring) is Trusted without needing a per-hash baseline. This is the main path to green.
+trusted_publishers = [
+  "Microsoft Windows", "Microsoft Corporation", "Microsoft Windows Publisher",
+  "Google LLC", "Intel", "Dell", "NVIDIA", "Realtek", "Mozilla Corporation",
+  "Valve", "Lenovo", "Advanced Micro Devices", "Logitech", "Apple Inc.",
+  "Hewlett-Packard", "HP Inc.", "Qualcomm", "Synaptics",
+]
+
+# Well-known system binaries: their sanctioned locations and parents. Used by the
+# wrong_path / wrong_parent rules and as name_spoof targets. Paths are case-insensitive.
+
+[[expected_binary]]
+name = "svchost.exe"
+paths = ['C:\Windows\System32\svchost.exe', 'C:\Windows\SysWOW64\svchost.exe']
+parents = ["services.exe"]
+
+[[expected_binary]]
+name = "lsass.exe"
+paths = ['C:\Windows\System32\lsass.exe']
+parents = ["wininit.exe"]
+
+[[expected_binary]]
+name = "services.exe"
+paths = ['C:\Windows\System32\services.exe']
+parents = ["wininit.exe"]
+
+[[expected_binary]]
+name = "csrss.exe"
+paths = ['C:\Windows\System32\csrss.exe']
+parents = ["smss.exe"]
+
+[[expected_binary]]
+name = "wininit.exe"
+paths = ['C:\Windows\System32\wininit.exe']
+parents = ["smss.exe"]
+
+[[expected_binary]]
+name = "winlogon.exe"
+paths = ['C:\Windows\System32\winlogon.exe']
+parents = ["smss.exe"]
+
+[[expected_binary]]
+name = "smss.exe"
+paths = ['C:\Windows\System32\smss.exe']
+parents = ["System"]
+
+[[expected_binary]]
+name = "explorer.exe"
+paths = ['C:\Windows\explorer.exe']
+parents = ["userinit.exe", "explorer.exe"]
+
+[[expected_binary]]
+name = "spoolsv.exe"
+paths = ['C:\Windows\System32\spoolsv.exe']
+parents = ["services.exe"]
+
+[[expected_binary]]
+name = "taskhostw.exe"
+paths = ['C:\Windows\System32\taskhostw.exe']
+parents = ["svchost.exe"]
+
+[[expected_binary]]
+name = "dllhost.exe"
+paths = ['C:\Windows\System32\dllhost.exe', 'C:\Windows\SysWOW64\dllhost.exe']
+parents = ["svchost.exe"]
+
+[[expected_binary]]
+name = "conhost.exe"
+paths = ['C:\Windows\System32\conhost.exe']
+parents = []

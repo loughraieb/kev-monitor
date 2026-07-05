@@ -1,0 +1,18 @@
+# Build output (this project builds into D:\cargo-target via CARGO_TARGET_DIR, but be safe)
+/target
+**/target
+
+# Runtime data / logs (never source)
+*.db
+*.db-shm
+*.db-wal
+*.log
+
+# Runtime config may contain a real VirusTotal API key — NEVER commit it.
+# The committed template is `config.example.toml` (key-less). kev also writes a
+# key-less config.toml on first launch when the user declines VirusTotal.
+config.toml
+
+# Local editor/OS cruft
+.DS_Store
+Thumbs.db
